@@ -50,34 +50,61 @@ def parse():
 
     if html.status_code == 200:
         posts = []
+        posts2 = []
         pages_count = get_pages_count(html.text)
         for page in range(1, pages_count + 1):
             print(f'Parsing page {page} from {pages_count}...')
             html = gethtml(URL, params=f'?p={page}')
-            posts.extend(getcontent(html.text))
-        print(posts)
-        return posts
+            posts.append(getcontent(html.text))
+            posts2.extend(getcontent(html.text))
+        return posts, posts2
     else:
         print('Error')
 
 
-if __name__ == '__main__':
-    posts = parse()
-
+def dumper(posts, posts2):
     workbook = xlsxwriter.Workbook('LabDM.xlsx')
-    worksheet = workbook.add_worksheet('Parsed')
 
-    row = 0
+    worksheet = workbook.add_worksheet('Common')
+    row = 1
     col = 0
-
-    for elem in posts:
+    worksheet.write(0, col, "Title")
+    worksheet.write(0, col + 1, "Link")
+    worksheet.write(0, col + 2, "Comments")
+    worksheet.write(0, col + 3, "Rating")
+    for elem in posts2:
         worksheet.write(row, col, elem['title'])
         worksheet.write(row, col + 1, elem['link'])
-        worksheet.write(row, col + 2, elem['comments'])
-        worksheet.write(row, col + 3, elem['rating'])
+        worksheet.write(row, col + 2, int(elem['comments']))
+        worksheet.write(row, col + 3, int(elem['rating']))
         row += 1
 
+    page_num = 1
+    for page in posts:
+        worksheet = workbook.add_worksheet(f'Page {page_num}')
+        page_num += 1
+        row = 1
+        col = 0
+        worksheet.write(0, col, "Title")
+        worksheet.write(0, col+1, "Link")
+        worksheet.write(0, col+2, "Comments")
+        worksheet.write(0, col+3, "Rating")
+        for elem in page:
+            worksheet.write(row, col, elem['title'])
+            worksheet.write(row, col + 1, elem['link'])
+            worksheet.write(row, col + 2, int(elem['comments']))
+            worksheet.write(row, col + 3, int(elem['rating']))
+            row += 1
+
     workbook.close()
+
+
+if __name__ == '__main__':
+    posts, posts2 = parse()
+    # print(posts)
+    dumper(posts, posts2)
+
+
 
 
 
