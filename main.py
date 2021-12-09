@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup as bs
 import requests
 import xlsxwriter
+import sqlite3 as sq
 
 URL = "https://www.playground.ru/cyberpunk_2077/opinion"
 HOST = "https://www.playground.ru"
@@ -99,10 +100,54 @@ def dumper(posts, posts2):
     workbook.close()
 
 
+def Db(posts):
+    connection = sq.connect("posts.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""CREATE TABLE IF NOT EXISTS posts_tb1(
+    id INTEGER,
+    title TEXT,
+    link TEXT,
+    comments INTEGER,
+    rating INTEGER
+    )""")
+
+    id = 1
+    for post in posts:
+        cursor.execute("INSERT INTO posts_tb1 VALUES (?,?,?,?,?)", [id, post['title'],
+                                                                    post['link'],
+                                                                    int(post['comments']),
+                                                                    int(post['rating'])])
+
+        id = id+1
+
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+def Queries():
+    connection = sq.connect("posts.db")
+    cursor = connection.cursor()
+    cursor.execute(
+        """select title, link, comments, rating from posts_tb1
+           
+            """)
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row)
+    cursor.close()
+    connection.close()
+
+
 if __name__ == '__main__':
     posts, posts2 = parse()
     # print(posts)
-    dumper(posts, posts2)
+    # dumper(posts, posts2)
+    Db(posts2)
+
+    Queries()
 
 
 
