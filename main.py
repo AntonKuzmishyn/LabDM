@@ -104,7 +104,7 @@ def Db(posts):
     connection = sq.connect("posts.db")
     cursor = connection.cursor()
 
-    cursor.execute("""CREATE TABLE IF NOT EXISTS posts_tb1(
+    cursor.execute("""CREATE TABLE IF NOT EXISTS posts_table(
     id INTEGER,
     title TEXT,
     link TEXT,
@@ -114,7 +114,7 @@ def Db(posts):
 
     id = 1
     for post in posts:
-        cursor.execute("INSERT INTO posts_tb1 VALUES (?,?,?,?,?)", [id, post['title'],
+        cursor.execute("INSERT INTO posts_table VALUES (?,?,?,?,?)", [id, post['title'],
                                                                     post['link'],
                                                                     int(post['comments']),
                                                                     int(post['rating'])])
@@ -130,7 +130,7 @@ def Queries():
     connection = sq.connect("posts.db")
     cursor = connection.cursor()
     cursor.execute(
-        """select title, link, comments, rating from posts_tb1
+        """select title, link, comments, rating from posts_table
            
             """)
     rows = cursor.fetchall()
@@ -144,7 +144,7 @@ def Queries():
 if __name__ == '__main__':
     posts, posts2 = parse()
     # print(posts)
-    # dumper(posts, posts2)
+    dumper(posts, posts2)
     Db(posts2)
 
     Queries()
